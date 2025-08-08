@@ -39,11 +39,21 @@ class FilterModule(object):
         if len(_flags) > 0:
             lines.append(f"flags {', '.join(map(str, cls.ensure_list(_flags)))}")
 
-            for k, v in config['settings'].items():
-                lines.append(f"{k} {v}")
+        for k, v in config['settings'].items():
+            lines.append(f"{k} {v}")
 
         if config['counter']:
             lines.append('counter')
+
+        _elements = []
+        try:
+            _elements = cls.ensure_list(config['elements'])
+        except KeyError:
+            pass
+        if len(_elements) > 0:
+            lines.append(
+                f"elements = {{ {', '.join(map(str, cls.ensure_list(_elements)))} }}"
+            )
 
         return cls._format_lines(whitespace=whitespace, lines=lines)
 

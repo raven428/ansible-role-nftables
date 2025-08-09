@@ -3,8 +3,6 @@
 - name: "NFTables | Table '{{ nft_table_name }}' | Chain '{{ nft_chain_name }}' | Checking config"
   ansible.builtin.assert:
     that: >
-      nft_chain.type in NFT_HC.choices.chain.types and
-      nft_chain.hook in NFT_HC.choices.hook[nft_table.type][nft_chain.type] and
       nft_chain.rules |
       nftables_rules_merge(NFT_CONFIG, nft_table, nft_chain_name) |
       nftables_rules_unique_sequence(NFT_HC.rules.sort)

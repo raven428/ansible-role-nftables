@@ -5,7 +5,6 @@
 
 table {{ nft_table.type }} {{ nft_table_name }} {
 {% include "_includes/definition_table.j2" %}
-
 {% for chain_name, chain_item in nft_table.chains.items() %}
 {%   set chain = defaults_chain | combine(nftables.defaults.chain | default({}), recursive=true) | combine(chain_item, recursive=true) %}
 {%   set chain_main = chain.hook is not none %}
@@ -13,17 +12,21 @@ table {{ nft_table.type }} {{ nft_table_name }} {
   chain {{ chain_name }} {
 {% if chain_main %}
     type {{ chain.type }} hook {{ chain.hook }} priority {{ chain.priority }}; policy {{ chain.policy }};
+
 {% endif %}
-{%   include "_includes/definition_chain.j2" %}
-
+{% if chain.vars | length > 0 %}
+    # vars
+{%   for k, v in chain.vars.items() %}
+    {{ k | nftables_format_var(v) }}
+{%   endfor %}
+{% endif %}
 {%   if chain_rules | length > 0 %}
-
     # rules
 {%     for rule in chain_rules %}
     {{ rule }}
 {%     endfor %}
-{%   endif %}
 
+{%   endif %}
 {%   if chain.counter %}
     counter comment "COUNT {{ nft_table_name }}-{{ chain_name }}{% if chain_main %}-{{ chain.policy }}{% endif %}"
 {%   endif %}
@@ -34,4 +37,3 @@ table {{ nft_table.type }} {{ nft_table_name }} {
 
 {% endfor %}
 }
-
